@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const { protect } = require('../middleware/authMiddleware');
 
 // Simple adjective/animal lists for random handle gen
 const adjectives = ['Silent', 'Velvet', 'Crimson', 'Feral', 'Misty', 'Hidden'];
@@ -21,7 +22,7 @@ function getRandomAvatar() {
 // @route POST /api/users/register
 router.post('/register', async (req, res) => {
   try {
-    const { username, pronouns, password } = req.body;
+    const { username, pronouns, email, password } = req.body;
 
     if (!password || password.length < 6) {
       return res
@@ -45,6 +46,7 @@ router.post('/register', async (req, res) => {
       username,
       pronouns,
       avatar,
+      email,
       password, // Will be hashed via pre-save middleware in User model
     });
 
@@ -93,6 +95,24 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PATCH /api/users/email
+router.patch('/email', protect, async (req, res) => {
+  const { email } = req.body;
+  if (!email || !/.+@.+\..+/.test(email)) {
+    return res.status(400).json({ message: 'Invalid email' });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    user.email = email;
+    await user.save();
+    res.json({ message: 'Email updated' });
+  } catch (err) {
+    console.error('Email update error:', err);
+    res.status(500).json({ message: 'Failed to update email' });
   }
 });
 

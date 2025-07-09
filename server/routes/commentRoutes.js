@@ -27,6 +27,22 @@ router.post('/:journalId', protect, async (req, res) => {
 
     await comment.save();
 
+    // Email the journal owner (if not the commenter themselves)
+    const sendEmail = require('../utils/sendEmail');
+
+    const journalOwner = await User.findById(journal.user);
+    if (
+      journalOwner &&
+      journalOwner.email &&
+      journalOwner._id.toString() !== req.user._id.toString()
+    ) {
+      await sendEmail(
+        journalOwner.email,
+        `New comment on your journal on Lyra`,
+        `"${req.user.handle}" commented: "${content}"\n\nVisit Lyra to read and reply.`
+      );
+    }
+
     // 🔔 Create notification
     if (!parent) {
       // Notify journal owner on top-level comment

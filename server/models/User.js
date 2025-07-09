@@ -10,6 +10,14 @@ const userSchema = new mongoose.Schema({
   discordLink: { type: String },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  blocked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  email: {
+    type: String,
+    required: false, // optional for now
+    lowercase: true,
+    trim: true,
+    match: [/.+@.+\..+/, 'Invalid email format'],
+  },
 });
 
 // Hash password before save

@@ -31,6 +31,18 @@ router.post('/:userId', protect, async (req, res) => {
 
     await newFollow.save();
 
+    const sendEmail = require('../utils/sendEmail');
+    const followedUser = await User.findById(targetUserId);
+    const followerUser = await User.findById(currentUserId);
+
+    if (followedUser?.email) {
+      await sendEmail(
+        followedUser.email,
+        `You have a new follower on Lyra`,
+        `"@${followerUser.handle}" started following you.\n\nCheck out their profile or journals on Lyra.`
+      );
+    }
+
     const Notification = require('../models/Notification');
 
     // 🔔 Send follow notification

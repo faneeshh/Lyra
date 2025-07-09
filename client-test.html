@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lyra Chat Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h2>Lyra Socket Chat Test</h2>
+
+    <input id="sender" placeholder="Sender ID" />
+    <input id="receiver" placeholder="Receiver ID" />
+    <input id="message" placeholder="Message" />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+      const socket = io('http://localhost:5000');
+
+      // Join room as a user
+      function join(userId) {
+        socket.emit('join', userId);
+      }
+
+      // Listen for new messages
+      socket.on('newMessage', (msg) => {
+        console.log('📩 New message:', msg);
+        alert(`New message from ${msg.sender}: ${msg.content}`);
+      });
+
+      function sendMessage() {
+        const sender = document.getElementById('sender').value;
+        const receiver = document.getElementById('receiver').value;
+        const content = document.getElementById('message').value;
+
+        socket.emit('sendMessage', { sender, receiver, content });
+      }
+
+      // Automatically join with sender ID once typed
+      document.getElementById('sender').addEventListener('change', (e) => {
+        join(e.target.value);
+      });
+    </script>
+  </body>
+</html>

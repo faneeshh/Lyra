@@ -64,6 +64,9 @@ app.use('/api/report', reportRoutes);
 const bookmarkRoutes = require('./routes/bookmarkRoutes');
 app.use('/api/bookmarks', bookmarkRoutes);
 
+const profileRoutes = require('./routes/profileRoutes');
+app.use('/api/profiles', profileRoutes);
+
 const http = require('http');
 const { Server } = require('socket.io');
 

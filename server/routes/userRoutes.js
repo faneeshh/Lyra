@@ -116,4 +116,32 @@ router.patch('/email', protect, async (req, res) => {
   }
 });
 
+// PATCH /api/users/me
+router.patch('/me', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    const { username, pronouns, avatar } = req.body;
+
+    // Optionally validate avatar from a fixed set
+    const allowedAvatars = ['fox_1.gif', 'fox_2.gif', 'fox_3.gif', 'fox_4.gif'];
+    if (avatar && !allowedAvatars.includes(avatar)) {
+      return res.status(400).json({ message: 'Invalid avatar selected' });
+    }
+
+    if (username) user.username = username;
+    if (pronouns) user.pronouns = pronouns;
+    if (avatar) user.avatar = avatar;
+
+    await user.save();
+
+    const { password, ...userData } = user.toObject();
+    res.json(userData);
+  } catch (err) {
+    console.error('Profile update error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 module.exports = router;
